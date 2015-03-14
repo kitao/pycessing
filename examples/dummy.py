@@ -1,0 +1,3 @@
+import pycessing
+
+print 'hoge'
