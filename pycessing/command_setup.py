@@ -36,10 +36,10 @@ def setup():
                     os.path.join(settings.COMMAND_LIB, 'core'))
 
     processing_ext_dir = os.path.join(processing_dir, settings.PROCESSING_LIBS)
-    for dirname in os.listdir(processing_ext_dir):
-        src_dir = os.path.join(processing_ext_dir, dirname)
+    for name in os.listdir(processing_ext_dir):
+        src_dir = os.path.join(processing_ext_dir, name)
         if os.path.isdir(src_dir):
-            dest_dir = os.path.join(settings.COMMAND_LIB, dirname)
+            dest_dir = os.path.join(settings.COMMAND_LIB, name)
             shutil.copytree(src_dir, dest_dir)
 
     shutil.rmtree(processing_dir, True)
@@ -52,13 +52,13 @@ def setup():
     open(check_file, 'a').close()
 
 
-def download_file(url, output_dir):
+def download_file(url, dest_dir):
     basename = os.path.basename(url)
     sys.stdout.write('download {0} ... '.format(basename))
     sys.stdout.flush()
 
-    filename = os.path.join(output_dir, basename)
-    ensure_dir(output_dir)
+    filename = os.path.join(dest_dir, basename)
+    ensure_dir(dest_dir)
 
     with open(filename, 'wb') as f:
         f.write(urllib2.urlopen(url).read())
@@ -67,16 +67,20 @@ def download_file(url, output_dir):
     return filename
 
 
-def unzip_file(zip_filename):
-    output_dir, basename = os.path.split(zip_filename)
+def unzip_file(filename):
+    dest_dir, basename = os.path.split(filename)
     sys.stdout.write('unzip {0} ... '.format(basename))
     sys.stdout.flush()
 
-    zf = zipfile.ZipFile(zip_filename, 'r')
-    zf.extractall(output_dir)
-    zf.close()
+    with zipfile.ZipFile(filename, 'r') as zf:
+        zf.extractall(dest_dir)
 
-    os.remove(zip_filename)
+    os.remove(filename)
+    for root, dirs, files in os.walk(dest_dir):
+        for name in files:
+            if name.startswith('._'):
+                os.remove(os.path.join(root, name))
+
     print 'done'
 
 
