@@ -1,41 +1,39 @@
 import os
 import sys
+import fnmatch
 
 import settings
 
 
 def load_library(name):
-    lib_dir = os.path.join(settings.COMMAND_LIB, name)
-    if load_jars(lib_dir):
+    lib_dir = os.path.join(settings.COMMAND_LIB, name, 'library')
+    if add_jars(lib_dir):
         return True
     else:
-        print 'library not found -- #{0}'.format(name)
+        print 'library not found -- {0}'.format(name)
         return False
 
 
-def load_jars(dir):
-    sys.path.append(jar_file)
+def add_jars(path):
+    if not os.path.isdir(path):
+        return False
+
+    is_success = False
+    for name in os.listdir(path):
+        if fnmatch.fnmatch(name, '*.jar'):
+            sys.path.append(os.path.join(path, name))
+            is_success = True
+            print 'jar file added -- {0}'.format(name)
+    return is_success
+
+
+def import_package(package):
     pass
+
 '''
-    for dirname in os.listdir(lib_dir):
-        src_dir = os.path.join(processing_ext_dir, dirname)
-        if os.path.isdir(src_dir):
-            dest_dir = os.path.join(COMMAND_LIB_DIR, dirname)
-            shutil.copytree(src_dir, dest_dir)
-
-  def self.load_jars(dir)
-    is_success = false
-
-    if File.directory?(dir)
-      Dir.glob(File.join(dir, '*.jar')).each do |jar|
-        require jar
-        is_success = true
-        puts "jar file loaded -- #{File.basename(jar)}"
-      end
-      return true if is_success
-    end
-
-    false
+  def self.import_package(package, module_name)
+    code = "module #{module_name}; include_package '#{package}'; end"
+    Object::TOPLEVEL_BINDING.eval(code)
   end
 '''
 
@@ -66,32 +64,33 @@ def reload():
     sketch_runner.system_requests.append({'command': 'reload'})
 
 
-if len(sys.argv) < 2:
-    print 'usage: {0} [sketchfile]'.format(settings.COMMAND_NAME)
-    sys.exit()
+if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print 'usage: {0} [sketchfile]'.format(settings.COMMAND_NAME)
+        sys.exit()
 
-sketch_file = os.path.abspath(sys.argv[1])
-sketch_name = os.path.splitext(os.path.basename(sketch_file))[0]
-sketch_dir = os.path.dirname(sketch_file)
+    sketch_file = os.path.abspath(sys.argv[1])
+    sketch_name = os.path.splitext(os.path.basename(sketch_file))[0]
+    sketch_dir = os.path.dirname(sketch_file)
 
-system_requests = []
-sketch_instances = []
+    system_requests = []
+    sketch_instances = []
 
-if not os.path.exists(sketch_file):
-    print 'sketch file not found -- {0}'.format(sketch_file)
-    sys.exit()
+    if not os.path.exists(sketch_file):
+        print 'sketch file not found -- {0}'.format(sketch_file)
+        sys.exit()
 
-if not load_library('core'):
-    sys.exit()
+    if not load_library('core'):
+        sys.exit()
 
+    from processing.core import *  # NOQA
+    from processing.opengl import *  # NOQA
 
-from processing.core import *  # NOQA
-from processing.opengl import *  # NOQA
+    sys.path.append(settings.COMMAND_ROOT)
 
-print sketch_file
-print sketch_name
-print sketch_dir
-
+    # sys.path.insert(0, sketch_dir)
+    # __import__(sketch_name)
+    execfile(sketch_file)
 
 '''
   INITIAL_FEATURES = $LOADED_FEATURES.dup
