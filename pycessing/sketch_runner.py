@@ -5,92 +5,30 @@ import fnmatch
 import settings
 
 
-def load_library(name):
-    lib_dir = os.path.join(settings.COMMAND_LIB, name, 'library')
-    if add_jars(lib_dir):
-        return True
-    else:
-        print 'library not found -- {0}'.format(name)
-        return False
-
-
-def add_jars(path):
-    if not os.path.isdir(path):
-        return False
-
-    is_success = False
-    for name in os.listdir(path):
-        if fnmatch.fnmatch(name, '*.jar'):
-            sys.path.append(os.path.join(path, name))
-            is_success = True
-            print 'jar file added -- {0}'.format(name)
-    return is_success
-
-
-def import_package(package):
-    pass
-
-'''
-  def self.import_package(package, module_name)
-    code = "module #{module_name}; include_package '#{package}'; end"
-    Object::TOPLEVEL_BINDING.eval(code)
-  end
-'''
-
-
-def complete_path(path):
-    return os.path.join(sketch_runner.sketch_dir, path)
-
-
-def start(sketch, title=None, topmost=False, pos=None):
-    '''
-    title = opts[:title] || SKETCH_NAME
-    topmost = opts[:topmost]
-    pos = opts[:pos]
-
-    PApplet.run_sketch([title], sketch)
-    '''
-
-    if topmost:
-        sketch_runner.system_requests.append(
-            {'command': 'topmost', 'sketch': sketch})
-
-    if pos:
-        sketch_runner.system_requests.append(
-            {'command': 'pos', 'sketch': sketch, 'pos': pos})
-
-
-def reload():
-    sketch_runner.system_requests.append({'command': 'reload'})
-
-
-if __name__ == '__main__':
+def run_sketch():
     if len(sys.argv) < 2:
         print 'usage: {0} [sketchfile]'.format(settings.COMMAND_NAME)
         sys.exit()
 
-    sketch_file = os.path.abspath(sys.argv[1])
-    sketch_name = os.path.splitext(os.path.basename(sketch_file))[0]
-    sketch_dir = os.path.dirname(sketch_file)
+    settings.sketch_file = os.path.abspath(sys.argv[1])
+    settings.sketch_name = os.path.splitext(
+        os.path.basename(settings.sketch_file))[0]
+    settings.sketch_dir = os.path.dirname(settings.sketch_file)
 
-    system_requests = []
-    sketch_instances = []
-
-    if not os.path.exists(sketch_file):
-        print 'sketch file not found -- {0}'.format(sketch_file)
+    if not os.path.exists(settings.sketch_file):
+        print 'sketch file not found -- {0}'.format(settings.sketch_file)
         sys.exit()
 
     if not load_library('core'):
         sys.exit()
 
-    from processing.core import *  # NOQA
-    from processing.opengl import *  # NOQA
+    # from processing.core import *  # NOQA
+    # from processing.opengl import *  # NOQA
 
     sys.path.append(settings.COMMAND_ROOT)
+    sys.path.insert(0, settings.sketch_dir)
+    __import__(settings.sketch_name)
 
-    # sys.path.insert(0, sketch_dir)
-    # __import__(sketch_name)
-    execfile(sketch_file)
 
 '''
   INITIAL_FEATURES = $LOADED_FEATURES.dup
@@ -102,7 +40,7 @@ if __name__ == '__main__':
 
     Thread.new do
       begin
-        Object::TOPLEVEL_BINDING.eval(File.read(SKETCH_FILE), SKETCH_FILE)
+        Object::TOPLEVEL_BINDING.eval(File.read(sketch_file), sketch_file)
       rescue Exception => e
         puts e
       end
@@ -134,7 +72,7 @@ if __name__ == '__main__':
           end
         end
 
-        Find.find(SKETCH_DIR) do |file|
+        Find.find(sketch_dir) do |file|
           is_ruby = FileTest.file?(file) && File.extname(file) == '.rb'
           throw :break_loop if is_ruby && File.mtime(file) > execute_time
         end
@@ -163,3 +101,65 @@ if __name__ == '__main__':
     java.lang.System.gc
   end
 '''
+
+
+def load_library(name):
+    lib_dir = os.path.join(settings.COMMAND_LIB, name, 'library')
+    if add_jars(lib_dir):
+        return True
+    else:
+        print 'library not found -- {0}'.format(name)
+        return False
+
+
+def add_jars(path):
+    if not os.path.isdir(path):
+        return False
+
+    is_success = False
+    for name in os.listdir(path):
+        if fnmatch.fnmatch(name, '*.jar'):
+            sys.path.append(os.path.join(path, name))
+            sys.packageManager.addJar(os.path.join(path, name), True)  # TODO
+            is_success = True
+            print 'jar file added -- {0}'.format(name)
+    return is_success
+
+
+def import_package(package):
+    pass
+    '''
+      def self.import_package(package, module_name)
+        code = "module #{module_name}; include_package '#{package}'; end"
+        Object::TOPLEVEL_BINDING.eval(code)
+      end
+    '''
+
+
+def complete_path(path):
+    return os.path.join(settings.sketch_dir, path)
+
+
+def start(sketch, title=None, topmost=False, pos=None):
+    if not title:
+        title = settings.sketch_name
+
+    from processing.core import PApplet
+    # PApplet.runSketch([title], sketch)
+    PApplet.runSketch([], sketch)
+
+    if topmost:
+        settings.system_requests.append(
+            {'command': 'topmost', 'sketch': sketch})
+
+    if pos:
+        settings.system_requests.append(
+            {'command': 'pos', 'sketch': sketch, 'pos': pos})
+
+
+def reload2():
+    settings.system_requests.append({'command': 'reload'})
+
+
+if __name__ == '__main__':
+    run_sketch()

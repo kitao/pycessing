@@ -1,71 +1,17 @@
-import os
-import sys
-import fnmatch
+import processing.core
 
-import settings
-
-
-def load_library(name):
-    lib_dir = os.path.join(settings.COMMAND_LIB, name, 'library')
-    if add_jars(lib_dir):
-        return True
-    else:
-        print 'library not found -- {0}'.format(name)
-        return False
+from sketch_runner import load_library  # NOQA
+from sketch_runner import add_jars  # NOQA
+from sketch_runner import import_package  # NOQA
+from sketch_runner import complete_path  # NOQA
+from sketch_runner import start  # NOQA
+from sketch_runner import reload2  # NOQA
 
 
-def add_jars(path):
-    if not os.path.isdir(path):
-        return False
+class SketchBase(processing.core.PApplet):
+    def __init__(self):
+        processing.core.PApplet.__init__(self)
 
-    is_success = False
-    for name in os.listdir(path):
-        if fnmatch.fnmatch(name, '*.jar'):
-            sys.path.append(os.path.join(path, name))
-            is_success = True
-            print 'jar file added -- {0}'.format(name)
-    return is_success
-
-
-def import_package(package):
-    pass
-
-'''
-  def self.import_package(package, module_name)
-    code = "module #{module_name}; include_package '#{package}'; end"
-    Object::TOPLEVEL_BINDING.eval(code)
-  end
-'''
-
-
-def complete_path(path):
-    return os.path.join(sketch_runner.sketch_dir, path)
-
-
-def start(sketch, title=None, topmost=False, pos=None):
-    '''
-    title = opts[:title] || SKETCH_NAME
-    topmost = opts[:topmost]
-    pos = opts[:pos]
-
-    PApplet.run_sketch([title], sketch)
-    '''
-
-    if topmost:
-        sketch_runner.system_requests.append(
-            {'command': 'topmost', 'sketch': sketch})
-
-    if pos:
-        sketch_runner.system_requests.append(
-            {'command': 'pos', 'sketch': sketch, 'pos': pos})
-
-
-def reload():
-    sketch_runner.system_requests.append({'command': 'reload'})
-
-
-class SketchBase:
-    pass
 '''
   # The base class of a Processing sketch
   class SketchBase < PApplet
