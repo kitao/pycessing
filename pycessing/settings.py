@@ -1,15 +1,12 @@
 import os
 import sys
 
-COMMAND_PACKAGE = os.path.abspath(os.path.dirname(__file__))
-
-COMMAND_ROOT = os.path.abspath(os.path.join(COMMAND_PACKAGE, '..'))
-
-COMMAND_NAME = os.path.basename(COMMAND_PACKAGE)
-
+COMMAND_ROOT = os.path.abspath(os.path.dirname(__file__))
+COMMAND_NAME = os.path.basename(COMMAND_ROOT)
 COMMAND_AUX = os.path.join(os.path.expanduser('~'), '.' + COMMAND_NAME)
-
 COMMAND_LIB = os.path.join(COMMAND_AUX, 'lib')
+
+PROJECT_ROOT = os.path.abspath(os.path.join(COMMAND_ROOT, '..'))
 
 PLATFORM = ('Mac' if sys.platform == 'darwin' else
             'Windows' if sys.platform == 'win32' else 'Linux')
@@ -36,3 +33,10 @@ PROCESSING_LIBS = {
 }[PLATFORM]
 
 WATCH_INTERVAL = 0.1
+
+sketch_file = None
+sketch_dir = None
+sketch_name = None
+
+system_requests = []
+sketch_instances = []

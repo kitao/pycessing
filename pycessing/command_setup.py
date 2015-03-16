@@ -12,7 +12,7 @@ def setup():
 
     if os.path.exists(check_file):
         check_mtime = os.stat(check_file).st_mtime
-        settings_file = os.path.join(settings.COMMAND_PACKAGE, 'settings.py')
+        settings_file = os.path.join(settings.COMMAND_ROOT, 'settings.py')
         command_mtime = os.stat(settings_file).st_mtime
         if check_mtime > command_mtime:
             return
@@ -44,7 +44,7 @@ def setup():
 
     shutil.rmtree(processing_dir, True)
 
-    examples_src_dir = os.path.join(settings.COMMAND_ROOT, 'examples')
+    examples_src_dir = os.path.join(settings.PROJECT_ROOT, 'examples')
     examples_dest_dir = os.path.join(settings.COMMAND_AUX, 'examples')
     print 'copy examples to {0}'.format(examples_dest_dir)
     shutil.copytree(examples_src_dir, examples_dest_dir)
