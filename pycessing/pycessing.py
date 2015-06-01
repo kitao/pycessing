@@ -1,16 +1,19 @@
 import processing.core
 
 from sketch_runner import load_library  # NOQA
-from sketch_runner import add_jars  # NOQA
-from sketch_runner import import_package  # NOQA
+from sketch_runner import load_all_jars  # NOQA
+from sketch_runner import load_jar  # NOQA
 from sketch_runner import complete_path  # NOQA
 from sketch_runner import start  # NOQA
 from sketch_runner import reload2  # NOQA
+
+import system_vars
 
 
 class SketchBase(processing.core.PApplet):
     def __init__(self):
         processing.core.PApplet.__init__(self)
+        system_vars.sketch_instances.append(self)
 
 '''
   # The base class of a Processing sketch

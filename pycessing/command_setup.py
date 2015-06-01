@@ -1,13 +1,12 @@
 import os
 import sys
-import shutil
-import urllib2
-import zipfile
 
 import settings
 
 
 def setup():
+    import shutil
+
     check_file = os.path.join(settings.COMMAND_AUX, '.setup_complete')
 
     if os.path.exists(check_file):
@@ -53,6 +52,8 @@ def setup():
 
 
 def download_file(url, dest_dir):
+    import urllib2
+
     basename = os.path.basename(url)
     sys.stdout.write('download {0} ... '.format(basename))
     sys.stdout.flush()
@@ -68,6 +69,8 @@ def download_file(url, dest_dir):
 
 
 def unzip_file(filename):
+    import zipfile
+
     dest_dir, basename = os.path.split(filename)
     sys.stdout.write('unzip {0} ... '.format(basename))
     sys.stdout.flush()
