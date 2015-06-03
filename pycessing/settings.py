@@ -12,7 +12,7 @@ PLATFORM = ('Mac' if sys.platform == 'darwin' else
             'Windows' if sys.platform == 'win32' else 'Linux')
 
 JYTHON_URL = ('http://search.maven.org/remotecontent?filepath=org/python/'
-              'jython-standalone/2.7-b4/jython-standalone-2.7-b4.jar')
+              'jython-standalone/2.7.0/jython-standalone-2.7.0.jar')
 
 PROCESSING_URL = {
     'Mac': 'http://download.processing.org/processing-2.2.1-macosx.zip',
@@ -33,10 +33,3 @@ PROCESSING_LIBS = {
 }[PLATFORM]
 
 WATCH_INTERVAL = 0.1
-
-sketch_file = None
-sketch_dir = None
-sketch_name = None
-
-system_requests = []
-sketch_instances = []
