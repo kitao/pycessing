@@ -1,5 +1,5 @@
 import command_setup
-import command_start
+import command_boot
 
 command_setup.setup()
-command_start.start()
+command_boot.boot()

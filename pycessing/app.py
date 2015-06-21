@@ -1,19 +1,49 @@
-import processing.core
-
-from sketch_runner import load_library  # NOQA
-from sketch_runner import load_all_jars  # NOQA
-from sketch_runner import load_jar  # NOQA
-from sketch_runner import complete_path  # NOQA
-from sketch_runner import start  # NOQA
-from sketch_runner import reload2  # NOQA
-
-import system_vars
+import sketch_info
+from processing.core import PApplet
 
 
-class SketchBase(processing.core.PApplet):
-    def __init__(self):
-        processing.core.PApplet.__init__(self)
-        system_vars.sketch_instances.append(self)
+class App(PApplet):
+  _instances = []
+
+  def __init__(self, title=None, topmost=None, pos=None):
+    App._instances.append(self)
+    PApplet.__init__(self)
+
+    self._title = title or sketch_info.basename
+    self._topmost = topmost
+    self._pos = pos
+    print self._title, self._topmost, self._pos
+
+  @classmethod
+  def _update_apps(cls):
+    print 'in update'
+    for app in cls._instances:
+      print 'in loop'
+      if app._topmost:
+        app.frame.setAlwaysOnTop(True)
+
+        if app.frame.isAlwaysOnTop():
+          app._topmost = None
+
+      if app._pos:
+        print 'pos 1'
+        pos = app.frame.getLocation()
+        app.frame.setLocation(app._pos[0], app._pos[1])
+        print 'pos 2'
+
+        if app._pos[0] == pos.x and app._pos[1] == pos.y:
+          app._pos = None
+          print 'pos 3'
+
+  @classmethod
+  def _dispose_apps(cls):
+    for app in cls._instances:
+      app.frame.dispose()
+      app.dispose()
+
+    cls._instances = []
+    # del cls._instances[:]
+
 
 '''
   # The base class of a Processing sketch
